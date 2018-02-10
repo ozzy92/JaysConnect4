@@ -3,7 +3,7 @@
 from django.shortcuts import render, redirect
 from django.shortcuts import get_object_or_404, get_list_or_404
 from django.http import HttpResponse, Http404, HttpResponseRedirect, JsonResponse
-from . import models
+from .models import Game
 
 
 # Create your views here.
@@ -37,7 +37,7 @@ def games(request):
     :param request:
     :return:
     """
-    return HttpResponse('Games Here!')
+    return render(request, 'connect4/games.html')
 
 def play(request, pk):
     """

@@ -1,26 +1,27 @@
-from __future__ import unicode_literals
+from enum import Enum
 from django.contrib.auth.models import User
 from django.utils import timezone
-from django.utils.encoding import python_2_unicode_compatible
 from django.db import models
 
-# Create your models here.
 
-@python_2_unicode_compatible
 class Game(models.Model):
+    class Status(Enum):
+        AVAILABLE = 0
+        RUNNING = 1
+        FINISHED = 2
+        ABANDONED = 3
+
     player1 = models.ForeignKey(User, on_delete=models.CASCADE, related_name='player_1')
     player2 = models.ForeignKey(User, on_delete=models.CASCADE, related_name='player_2', blank=True, null=True)
-    status = models.CharField(max_length=10)
+    status = models.IntegerField(default = Status.AVAILABLE.value)
     winner = models.CharField(max_length=10)
     created_date = models.DateTimeField(default=timezone.now)
-
 
     def __str__(self):
         if self.player2:
             return ' vs '.join([self.player1.get_full_name(), self.player2.get_full_name()])
-
         else:
-            return 'Join now to play %s'%self.player1.get_short_name()
+            return 'Join now to play %s' % (self.player1.get_full_name() or self.player1.get_username())
 
     @property
     def start_date(self):
@@ -50,7 +51,7 @@ class Game(models.Model):
 
         return True
 
-@python_2_unicode_compatible
+
 class Coin(models.Model):
     game = models.ForeignKey(Game, on_delete=models.CASCADE)
     player = models.ForeignKey(User, on_delete=models.CASCADE)
