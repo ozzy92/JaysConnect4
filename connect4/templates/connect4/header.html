@@ -5,6 +5,14 @@
         <script type="text/javascript" src="{{ STATIC_URL }}reconnecting-websocket.js"></script>
         <script type="text/javascript" src="{{ STATIC_URL }}connect4/connect4.js"></script>
         <script type="text/javascript" src="{{ STATIC_URL }}connect4/games.js"></script>
-        <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}styles.css">
+        <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}connect4/styles.css">
     </head>
     <body>
+        <div>
+            <span>Hello {{ user }}</span>
+            {% if authenticated %}
+                <span><a href="/accounts/logout?next=/">Logout</a></span>
+            {% else %}
+                <span><a href="/accounts/login?next=/">Login</a></span>
+            {% endif %}
+        </div>

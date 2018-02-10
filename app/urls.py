@@ -16,7 +16,7 @@ Including another URLconf
 from django.conf.urls import url, include
 from django.contrib import admin
 from django.http import HttpResponseRedirect
-from django.urls import reverse
+from django.urls import path, reverse
 import connect4.urls
 
 urlpatterns = [
@@ -25,4 +25,5 @@ urlpatterns = [
     # https://stackoverflow.com/questions/7580220/django-urls-howto-map-root-to-app
     url(r'^$', lambda r: HttpResponseRedirect('/connect4/')),
     url(r'^connect4/', include(connect4.urls)),
+    path('accounts/', include('django.contrib.auth.urls')),
 ]

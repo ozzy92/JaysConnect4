@@ -31,7 +31,7 @@ class RunningGames(GamesList):
 
 class UserGames(GamesList):
     ''' generic list view for available games list '''
-    list_name = 'Games in Progress'
+    list_name = 'Your Previous Games'
     list_id = 'running_games'
 
     def get_queryset(self):

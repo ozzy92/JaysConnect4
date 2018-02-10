@@ -5,10 +5,7 @@ from . import views, rester, partial_views
 
 urlpatterns = [    
     url(r'^$', lambda r: HttpResponseRedirect('games')),    # redirect root to games
-    url(r'^login/$', views.login),
-    url(r'^signup/$', views.signup),
-    url(r'^logout/$', views.logout),
-    url(r'^games/$', views.games),
+    path('games/', views.games),
     path('play/<int:pk>/', views.play),
     path('rester/create_game/', rester.create_game),
 
