@@ -102,14 +102,19 @@ WSGI_APPLICATION = 'app.wsgi.application'
 
 
 # Database
-# https://docs.djangoproject.com/en/1.9/ref/settings/#databases
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+# Helpful snippet from
+# https://stackoverflow.com/questions/15467389/heroku-created-table-but-when-ill-migrate-he-says-that-doesnt-created/37211806#37211806
+in_heroku = 'DATABASE_URL' in os.environ
+if in_heroku:
+    import dj_database_url
+    DATABASES = {'default': dj_database_url.config()}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        }
     }
-}
 
 
 # Password validation
