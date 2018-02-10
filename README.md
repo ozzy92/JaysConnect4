@@ -1,3 +1,22 @@
+
+# My Notes, Being new to Django, and pretty rusty to building websites from scratch, I had to do alot of googling
+
+# Jquery 
+https://stackoverflow.com/questions/12031825/how-to-set-up-django-website-with-jquery 
+
+# Websockets tutorial here, but out of date, broke my install!
+https://blog.heroku.com/in_deep_with_django_channels_the_future_of_real_time_apps_in_django
+# Actual docs more up to date, follow this
+https://channels.readthedocs.io/
+
+# Reconnecting websocket project
+https://github.com/joewalnes/reconnecting-websocket
+
+
+###########################################
+# Original project spec below from here:
+https://github.com/Yobota/connect4casestudy
+
 # Yobota development case study
 
 This repo contains the source code for the Yobota case study exercise.

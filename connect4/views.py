@@ -39,10 +39,10 @@ def games(request):
     """
     return HttpResponse('Games Here!')
 
-def play(request):
+def play(request, pk):
     """
     write your view which controls the gameplay interaction w the web layer here
     :param request:
     :return:
     """
-    return HttpResponse('Play Here!')
+    return render(request, 'connect4/play.html', { 'game_pk' : pk} )

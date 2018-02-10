@@ -27,9 +27,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
-
 # Application definition
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -38,7 +36,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.humanize',
-    'connect4'
+    'channels',
+    'connect4',
 ]
 
 MIDDLEWARE = [
@@ -62,7 +61,7 @@ STATIC_URL = '/static/'
 
 # Extra places for collectstatic to find static files.
 STATICFILES_DIRS = [
-    #os.path.join(BASE_DIR, 'static'),
+    os.path.join(BASE_DIR, 'static'),
 ]
 
 # Simplified static file serving.
@@ -99,7 +98,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'app.wsgi.application'
-
+ASGI_APPLICATION = "app.routing.application"
 
 # Database
 # Helpful snippet from
@@ -107,7 +106,9 @@ WSGI_APPLICATION = 'app.wsgi.application'
 in_heroku = 'DATABASE_URL' in os.environ
 if in_heroku:
     import dj_database_url
-    DATABASES = {'default': dj_database_url.config()}
+    DATABASES = {
+        'default' : dj_database_url.config()
+    }
 else:
     DATABASES = {
         'default': {

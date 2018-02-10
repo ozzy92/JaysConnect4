@@ -21,6 +21,8 @@ import connect4.urls
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
-    url(r'^$', lambda r: HttpResponseRedirect('/connect4/games')),
+    # redirect root to connect4; tip from:
+    # https://stackoverflow.com/questions/7580220/django-urls-howto-map-root-to-app
+    url(r'^$', lambda r: HttpResponseRedirect('/connect4/')),
     url(r'^connect4/', include(connect4.urls)),
 ]
