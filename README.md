@@ -8,6 +8,9 @@ https://stackoverflow.com/questions/12031825/how-to-set-up-django-website-with-j
 https://blog.heroku.com/in_deep_with_django_channels_the_future_of_real_time_apps_in_django
 # Actual docs more up to date, follow this
 https://channels.readthedocs.io/
+# Some hints here
+https://teamtreehouse.com/community/deploying-asgi-alongside-wsgi-on-heroku
+
 
 # Reconnecting websocket project
 https://github.com/joewalnes/reconnecting-websocket

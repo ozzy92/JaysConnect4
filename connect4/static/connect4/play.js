@@ -16,10 +16,9 @@ function play_game(game_pk) {
 
         // wire up receive message
         socket.onmessage = function(message) {
-            console.log('Received message: ' + message);
-
             var data = JSON.parse(message.data);
 
+            console.log('Received message: ' + data);
             $('#data').append('<div>Got Data: ' + data + '</div>');
         };
     });

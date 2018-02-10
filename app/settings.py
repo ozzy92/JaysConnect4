@@ -97,6 +97,16 @@ TEMPLATES = [
     },
 ]
 
+# chanel layers for heroku
+# CHANNEL_LAYERS = {
+#     "default": {
+#         "BACKEND": "channels_redis.core.RedisChannelLayer",
+#         "CONFIG": {
+#             "hosts": [(os.environ.get('REDIS_URL', 'redis://localhost'), 6379)],
+#         },
+#     },
+# }
+
 WSGI_APPLICATION = 'app.wsgi.application'
 ASGI_APPLICATION = "app.routing.application"
 
