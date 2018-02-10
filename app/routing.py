@@ -9,7 +9,7 @@ from connect4 import consumers
 application = ProtocolTypeRouter({
     "websocket" : AuthMiddlewareStack(
         URLRouter([
-            path('connect4/', include(connect4.routing)),
+            path('connect4ws/', include(connect4.routing)),
         ])
     ),
 })
