@@ -97,12 +97,16 @@ TEMPLATES = [
     },
 ]
 
-# chanel layers for heroku
+# chanel layers for channels_redis
+# I simply cannot get this to work.
+# The documentation is terrible, and all tutorials use asgi_regis and version 1.0 which breaks things
+# going to use http polling, yay
 # CHANNEL_LAYERS = {
 #     "default": {
 #         "BACKEND": "channels_redis.core.RedisChannelLayer",
 #         "CONFIG": {
-#             "hosts": [(os.environ.get('REDIS_URL', 'redis://localhost'), 6379)],
+#             #"hosts": [(os.environ.get('REDIS_URL', 'redis://localhost'), 6379)],
+#             "hosts": [('localhost', 6379)],
 #         },
 #     },
 # }

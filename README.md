@@ -4,6 +4,7 @@
 # Jquery 
 https://stackoverflow.com/questions/12031825/how-to-set-up-django-website-with-jquery 
 
+# from what I can tell, channels_redis doesn't work, at all. I give up.  I'm going to do http polling
 # Websockets tutorial here, but out of date, broke my install!
 https://blog.heroku.com/in_deep_with_django_channels_the_future_of_real_time_apps_in_django
 # Actual docs more up to date, follow this
