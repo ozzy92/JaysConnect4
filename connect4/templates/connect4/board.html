@@ -1,41 +1,46 @@
-<div>
-    <span>Player 1:
+<div class="playerbar">
+    <span class="player1" style="background: {{ game.player1_color_web }};">
+        Player 1:
         {% if is_player1 %}
             You!
         {% else %}
             {{ game.player1_name }}
         {% endif %}
     </span>
-    <span>
+    <span class="player2" style="background: {{ game.player2_color_web }};">
         Player 2:
         <span id="player2">
             {% if is_player2 %}
                 You!
             {% elif game.player2 %}
                 {{ game.player2_name }}
-            {% elif not is_player1 %}
-                <button onclick="join_game();">Join Game</button>
+            {% else %}
+                Waiting for Someone!
             {% endif %}
         </span>
     </span>
 </div>
-<div>
+<div class="moveinfo">
     {% if is_user_move %}
         It's your move.  Place a coin in your desired column.
     {% elif next_move %}
         Waiting for {{ next_move }} to make a move.
     {% elif game.winner_name %}
         {{ game.winner_name }} Wins!
+        <a class="leavegame" href="/connect4/games/">Go to Games</a>
+    {% elif not is_player1 and not game.player2 %}
+        Join the game to play
+        <button onclick="join_game();">Join Game</button>
     {% endif %}
 </div>
-<table>
+<table class="board">
     <tr>
         {% for col_full in game.col_full %}
-            <td>
+            <td class="boardtop">
                 {% if col_full %}
                     <span>Column Full</span>
                 {% elif is_user_move %}
-                    <button onclick="make_move({{ forloop.counter0 }});">Place Coin</button>
+                    <button class="placecoin" onclick="make_move({{ forloop.counter0 }});">Place Coin</button>
                 {% endif %}
             </td>
         {% endfor %}
@@ -43,7 +48,7 @@
     {% for row in game.board reversed %}
         <tr>
             {% for col in row %}
-                <td id="row{{ forloop.parentloop.counter0 }}col{{ forloop.counter0 }}">
+                <td class="board" style="background: {% if col.0 %}{{ col.1 }}{% endif %}" id="row{{ forloop.parentloop.counter0 }}col{{ forloop.counter0 }}">
                     {% if col.0 %}
                         <span>{% if col.0 == 1 %}{{ game.player1_name }}{% elif col.0 == 2 %}{{ game.player2_name }}{% endif %}</span>
                     {% endif %}
@@ -52,11 +57,11 @@
         </tr>
     {% endfor %}
 </table>
-<div>
-    <span>Moves</span>
-    <ol>
+<div class="moveslist">
+    <span class="moveslisttitle">Moves</span>
+    <ol class="moveslist">
         {% for move in game.coin_set.all %}
-            <li>
+            <li class="moveslist">
                 {{ move }}
             </li>
         {% endfor %}

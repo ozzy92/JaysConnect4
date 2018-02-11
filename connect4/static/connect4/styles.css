@@ -37,7 +37,7 @@ button:hover {
     background-color: #a20101;
 }
 
-/* games page game lists */
+/* games page lists */
 div.games {
     text-align: center;
 }
@@ -95,3 +95,106 @@ a:hover.gamelist {
     background-color: #c126af;
 }
 
+/** board table **/
+div.playerbar {
+    width: 100%;
+    padding: 30px;
+    margin-top: 10px;
+    background-color: #00e224;
+    color: white;
+    font-size: 20;
+}
+
+span.player1 {
+    padding: 5px;
+}
+
+span.player2 {
+    position: absolute;
+    right: 15px;
+    padding: 5px;
+}
+
+div.moveinfo {
+    padding: 20px;
+    border-style: solid;
+    border-color: red;
+    margin: 5px;
+    font-size: 20;
+}
+
+a.leavegame {
+    float: right;
+}
+
+table.board {
+    border-collapse: collapse;
+    background: yellow;
+    float: left;
+}
+
+td.board {
+    width: 50px;
+    height: 50px;
+    border: 7px solid yellow;
+    border-radius: 100%;
+    text-align: center;
+    /* yes colors look weird, but used columns change to dark coin colors */
+    color: white;
+    background: white;
+}
+
+td.boardtop {
+    width: 50px;
+    height: 50px;
+    border: 7px solid transparent;
+    border-bottom: 7px solid yellow;
+    text-align: center;
+}
+
+button.placecoin {
+    background-color: #f51e1e;
+    font-size: 15;
+    color: white;
+    padding: 8px;
+    margin: 0px;
+    border: none;
+    border-radius: 10px;
+}
+
+button:hover.placecoin {
+    background-color: #a20101;
+}
+
+/** board moves list (mostly borrowed from games) **/
+div.moveslist {
+    float: right;
+    border: 10px solid #0000FF;
+    border-radius: 5px;
+    margin: 5px;
+    width: 300px;
+    text-align: center;
+}
+
+span.moveslisttitle {
+    display: block;
+    font-size: 20;
+    background-color: #0088FF;
+    color: #FFFFFF;
+    width: 100%;
+    line-height: 40px;
+}
+
+ol.moveslist {
+    list-style-type: none;
+    margin: 0px;
+    padding: 0px;    
+}
+
+li.moveslist {
+    display: block;
+    margin: 1px;
+    padding: 5px;
+    background-color: #ffb2f6;
+    color: #130075;
+}

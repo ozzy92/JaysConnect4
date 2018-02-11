@@ -36,10 +36,18 @@ class Game(models.Model):
     @property
     def player1_name(self):
         return self.player1.get_short_name()
-    
+
+    @property
+    def player1_color_web(self):
+        return '#{0:06X}'.format(self.player1color)
+
     @property
     def player2_name(self):        
         return self.player2.get_short_name() if self.player2 else ''
+
+    @property
+    def player2_color_web(self):
+        return '#{0:06X}'.format(self.player2color)
 
     @property
     def winner_name(self):
@@ -84,7 +92,8 @@ class Game(models.Model):
         for coin in self.coin_set.all():
             player = 1 if coin.player == self.player1 else 2 if coin.player == self.player2 else None
             color = self.player1color if player == 1 else self.player2color if player == 2 else None
-            board[coin.row][coin.column] = [player, color]
+            # color converted to web hex for the template
+            board[coin.row][coin.column] = [player, '#{0:06X}'.format(color)]
         col_full = [all(board[row][col][0] for row in range(self.ROWS)) for col in range(self.COLS)]
         return (board, col_full)
 
