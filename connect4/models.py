@@ -21,7 +21,7 @@ class Game(models.Model):
     player2 = models.ForeignKey(User, on_delete=models.CASCADE, related_name='player_2', blank=True, null=True)
     player2color = models.IntegerField(default = 0xFF0000) # red
     status = models.IntegerField(default = Status.AVAILABLE.value)
-    winner = models.IntegerField(blank = True, null = True)
+    winner = models.IntegerField(default = None, blank = True, null = True)
     created_date = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
