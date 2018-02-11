@@ -28,8 +28,10 @@ class Game(models.Model):
         if self.winner:
             return '%s wins vs %s' % (self.winner_name, self.player1_name if self.winner == 2 else self.player2_name)
         else:
-            return '%s vs %s%s' % (
-                self.player1_name, self.player2_name or '(Click to Join)',
+            return '%s %s %s%s' % (
+                self.player1_name, 
+                'draws' if self.is_draw else 'vs',
+                self.player2_name or '(Click to Join)',
                 ' (Abandoned)' if self.status == self.Status.ABANDONED.value else ''
             )
 
@@ -52,6 +54,12 @@ class Game(models.Model):
     @property
     def winner_name(self):
         return self.player1_name if self.winner == 1 else self.player2_name if self.winner == 2 else None
+
+    @property
+    def is_draw(self):
+        # game is a draw if board fills up!
+        # FIXME: no validation... 
+        return self.status == self.Status.FINISHED.value and not self.winner
 
     @property
     def start_date(self):
@@ -84,7 +92,8 @@ class Game(models.Model):
     def _build_board(self):
         ''' returns a tuple (board, col_full)
             board is a list of lists, rows of columns
-                each cell is a list [player, color]; player is (1 or 2) or None (empty)
+                each cell is a list [player, color, win];
+                    player is (1 or 2) or None (empty), win is True if winning move
             col_full is a list of bools to specific if the column is full
         '''
         # FIXME: this does no validation, it assumes all the moves and players are valid
@@ -93,7 +102,7 @@ class Game(models.Model):
             player = 1 if coin.player == self.player1 else 2 if coin.player == self.player2 else None
             color = self.player1color if player == 1 else self.player2color if player == 2 else None
             # color converted to web hex for the template
-            board[coin.row][coin.column] = [player, '#{0:06X}'.format(color)]
+            board[coin.row][coin.column] = [player, '#{0:06X}'.format(color), coin.winner]
         col_full = [all(board[row][col][0] for row in range(self.ROWS)) for col in range(self.COLS)]
         return (board, col_full)
 
@@ -128,17 +137,21 @@ class Game(models.Model):
                 # determine the row the coin falls to
                 for (row_index, row) in enumerate(board):
                     if not row[column][0]:
-                        # valid move, check if they won!  Add their coin to the board, so we don't need to reload
+                        # valid move, create the move
+                        coin = self.coin_set.create(game=self, player=player, row=row_index, column=column)
+                        coin.save()
+                        # check if they won!  Add their coin to the board, so we don't need to reload
                         # FIXME: this is a race condition, I need to figure out how to do transactions
                         # if the user is really fast, they could try and place another coin                        
-                        board[row_index][column] = (player_num, None)  # is_winner doesn't check color
+                        board[row_index][column] = (player_num, None, False)
                         if self._is_winner(board, row_index, column):
                             self.status = self.Status.FINISHED.value
                             self.winner = player_num
                             self.save()
-                        # create the move
-                        coin = self.coin_set.create(game=self, player=player, row=row_index, column=column)
-                        coin.save()
+                        # no winner, see if it's a draw
+                        elif len(self.coin_set.all()) == self.ROWS * self.COLS:
+                            self.status = self.Status.FINISHED.value
+                            self.save()                            
                         return True
         logging.warning('Invalid move received %s, %s, %s' % (self.id, player.username, column))
         return False
@@ -151,10 +164,12 @@ class Game(models.Model):
         def _four_in_a_row(cells):
             ''' helper to loop through cell sequence that is adjacent, list of tuple (row, col) '''
             sequential = 0
-            for (r, c) in cells:
+            for (i, (r, c)) in enumerate(cells):
                 if board[r][c][0] == player:
                     sequential += 1
                     if sequential == 4:
+                        # found a winner, mark the board
+                        self._mark_winners(cells[i-3:i+1])
                         return True
                 else:
                     sequential = 0
@@ -177,6 +192,14 @@ class Game(models.Model):
         is_winner = any(_four_in_a_row(cells) for cells in cells_lists)
         return is_winner
 
+    def _mark_winners(self, cells):
+        ''' marks winning coins '''
+        for coin in self.coin_set.all():
+            (r, c) = (coin.row, coin.column)
+            if (r, c) in cells:
+                coin.winner = True
+                coin.save()
+
 
 class Coin(models.Model):
     game = models.ForeignKey(Game, on_delete=models.CASCADE)
@@ -184,8 +207,11 @@ class Coin(models.Model):
     column = models.IntegerField()
     row = models.IntegerField()
     created_date = models.DateTimeField(default=timezone.now)
+    winner = models.BooleanField(default = False)
 
-    def __str__(self):
-        return '%s placed in column %d to drop in row %d' % (
-            self.player.get_short_name(), self.column + 1, (Game.ROWS - self.row)
+    def __str__(self):        
+        last = self == self.game.last_move
+        return '%s column %d, for row %d%s' % (
+            self.player.get_short_name(), self.column + 1, (Game.ROWS - self.row),
+            ', To Win!' if last and self.winner else ', To Draw!' if last and self.game.is_draw else ''
         )

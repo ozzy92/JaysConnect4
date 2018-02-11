@@ -1,6 +1,8 @@
 {% include "./header.html" with title="Connect4: Games!" %}
 <script type="text/javascript" src="{{ STATIC_URL }}connect4/games.js"></script>
-<div><button onclick="create_game();">Create New Game</button></div>
+{% if authenticated %}
+    <div><button onclick="create_game();">Create New Game</button></div>
+{% endif %}
 <div class="games">
     {% include "./game_list.html" with list_id="available_games" list_name="Available Games" %}
     {% include "./game_list.html" with list_id="running_games" list_name="Games In Progress" %}

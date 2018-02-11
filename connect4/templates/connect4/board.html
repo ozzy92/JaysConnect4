@@ -28,19 +28,28 @@
     {% elif game.winner_name %}
         {{ game.winner_name }} Wins!
         <a class="leavegame" href="/connect4/games/">Go to Games</a>
+    {% elif game.is_draw %}
+        It's a Draw!  No winners this time.
+        <a class="leavegame" href="/connect4/games/">Go to Games</a>
     {% elif not is_player1 and not game.player2 %}
-        Join the game to play
-        <button onclick="join_game();">Join Game</button>
+        {% if user.is_authenticated %}
+            Join the game to play
+            <button onclick="join_game();">Join Game</button>
+        {% else %}
+            Login to join!
+        {% endif %}
     {% endif %}
 </div>
 <table class="board">
     <tr>
         {% for col_full in game.col_full %}
             <td class="boardtop">
-                {% if col_full %}
-                    <span>Column Full</span>
-                {% elif is_user_move %}
-                    <button class="placecoin" onclick="make_move({{ forloop.counter0 }});">Place Coin</button>
+                {% if is_user_move %}
+                    {% if col_full %}
+                        <span class="columnfull">Column Full</span>
+                    {% else %}
+                        <button class="placecoin" onclick="make_move({{ forloop.counter0 }});">Place Coin</button>
+                    {% endif %}
                 {% endif %}
             </td>
         {% endfor %}
@@ -48,9 +57,17 @@
     {% for row in game.board reversed %}
         <tr>
             {% for col in row %}
-                <td class="board" style="background: {% if col.0 %}{{ col.1 }}{% endif %}" id="row{{ forloop.parentloop.counter0 }}col{{ forloop.counter0 }}">
+                <td class="{% if col.2 %}boardwinner{% else %}board{% endif %}"
+                        style="background: {% if col.0 %}{{ col.1 }}{% endif %}"
+                        id="row{{ forloop.parentloop.counter0 }}col{{ forloop.counter0 }}">
                     {% if col.0 %}
-                        <span>{% if col.0 == 1 %}{{ game.player1_name }}{% elif col.0 == 2 %}{{ game.player2_name }}{% endif %}</span>
+                        <span>
+                            {% if col.0 == 1 %}
+                                {{ game.player1_name }}
+                            {% elif col.0 == 2 %}
+                                {{ game.player2_name }}
+                            {% endif %}
+                        </span>
                     {% endif %}
                 </td>
             {% endfor %}
