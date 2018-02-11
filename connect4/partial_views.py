@@ -56,6 +56,7 @@ class BoardView(generic.DetailView):
             'is_player2' : game.player2 == self.request.user,
             'next_move' : game.next_move.get_short_name() if game.next_move else None,
             'is_user_move' : game.next_move == self.request.user,
+            'prompt_leave' : (game.player1 == self.request.user or game.player2 == self.request.user) and game.next_move
         })
         return context
  

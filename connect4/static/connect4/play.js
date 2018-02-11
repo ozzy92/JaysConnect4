@@ -1,5 +1,6 @@
 
 var game_pk;
+var prompt_leave;
 
 // reload board html with polling query
 function load_board() {
@@ -30,6 +31,14 @@ function play_game() {
     console.log('Playgame ' + game_pk + ' running.');
     $(document).ready(() => {        
         load_board();
+        // hook leave prompt
+        $(window).bind('beforeunload', function(){
+            if(prompt_leave) {
+                // prompt is not guaranteed
+                // https://stackoverflow.com/questions/7080269/javascript-before-leaving-the-page
+                return 'Leave the game?';
+            }
+        });
     });
     /** sockets would be so much cleaner
     $(document).ready(function() {        

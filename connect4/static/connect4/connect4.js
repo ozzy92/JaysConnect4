@@ -13,6 +13,11 @@ function connect_socket(url) {
 // helper to turn setTimeout into a Promise
 var wait = ms => new Promise(resolve => setTimeout(resolve, ms));
 
+function http_get_promise(url) {
+    // simple wrapper around jquery get that turns it into a promis
+    //new Promise(resolve => )
+}
+
 function polling_http(url, interval, callback) {
     // since I can't get websocket working, we will simulate it!
     // url - relative url to json ajax page

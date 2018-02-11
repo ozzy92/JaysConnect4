@@ -1,3 +1,7 @@
+<script type="text/javascript">
+    // this script snippet sets globals in play.js if the user is in or out of the game
+    prompt_leave = {% if prompt_leave %}true{% else %}false{% endif %};
+</script>
 <div class="playerbar">
     <span class="player1" style="background: {{ game.player1_color_web }};">
         Player 1:
