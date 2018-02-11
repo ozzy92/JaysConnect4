@@ -1,6 +1,7 @@
 
 from .models import Game
 from django.views import generic
+from django.db.models import Q
 
 class GamesList(generic.ListView):
     template_name = 'connect4/game_list.html'
@@ -32,11 +33,15 @@ class RunningGames(GamesList):
 class UserGames(GamesList):
     ''' generic list view for available games list '''
     list_name = 'Your Previous Games'
-    list_id = 'running_games'
+    list_id = 'user_games'
 
     def get_queryset(self):
-        # FIXME: implement!
-        return []
+        games = Game.objects.filter(Q(status = Game.Status.FINISHED.value) &
+                                    (Q(player1 = self.request.user) | Q(player2 = self.request.user)))
+        # limit to 50, in case someone really likes it
+        games = games[:50]
+        return games
+
 
 class BoardView(generic.DetailView):
     ''' game board view '''

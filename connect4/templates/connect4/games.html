@@ -4,6 +4,6 @@
 {% include "./game_list.html" with list_id="available_games" list_name="Available Games" %}
 {% include "./game_list.html" with list_id="running_games" list_name="Games In Progress" %}
 {% if authenticated %}
-    {% include "./game_list.html" with list_id="previous_games" list_name="Your Previous Games" %}
+    {% include "./game_list.html" with list_id="user_games" list_name="Your Previous Games" %}
 {% endif %}
 {% include "./footer.html" %}

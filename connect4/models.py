@@ -25,10 +25,13 @@ class Game(models.Model):
     created_date = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
-        if self.player2:
-            return ' vs '.join([self.player1_name, self.player2_name])
+        if self.winner:
+            return '%s wins vs %s' % (self.winner_name, self.player1_name if self.winner == 2 else self.player2_name)
         else:
-            return 'Join now to play %s' % self.player1_name
+            return '%s vs %s%s' % (
+                self.player1_name, self.player2_name or '(Click to Join)',
+                ' (Abandoned)' if self.status == self.Status.ABANDONED.value else ''
+            )
 
     @property
     def player1_name(self):
@@ -174,6 +177,6 @@ class Coin(models.Model):
     created_date = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
-        return ' '.join([
-            self.player, 'to', self.row, self.column
-        ])
+        return '%s placed in column %d to drop in row %d' % (
+            self.player.get_short_name(), self.column + 1, (Game.ROWS - self.row)
+        )
