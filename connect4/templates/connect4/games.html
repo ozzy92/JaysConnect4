@@ -1,9 +1,11 @@
 {% include "./header.html" with title="Connect4: Games!" %}
 <script type="text/javascript" src="{{ STATIC_URL }}connect4/games.js"></script>
-<button onclick="create_game();">Create New Game</button>
-{% include "./game_list.html" with list_id="available_games" list_name="Available Games" %}
-{% include "./game_list.html" with list_id="running_games" list_name="Games In Progress" %}
-{% if authenticated %}
-    {% include "./game_list.html" with list_id="user_games" list_name="Your Previous Games" %}
-{% endif %}
-{% include "./footer.html" %}
+<div><button onclick="create_game();">Create New Game</button></div>
+<div class="games">
+    {% include "./game_list.html" with list_id="available_games" list_name="Available Games" %}
+    {% include "./game_list.html" with list_id="running_games" list_name="Games In Progress" %}
+    {% if authenticated %}
+        {% include "./game_list.html" with list_id="user_games" list_name="Your Previous Games" %}
+    {% endif %}
+    {% include "./footer.html" %}
+</div>

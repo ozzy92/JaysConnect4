@@ -1,8 +1,8 @@
-<div id="{{ list_id }}">
-    <span>{{ list_name }}</span>
-    <ul>
+<div class="gamelist" id="{{ list_id }}">
+    <span class="gamelisttitle">{{ list_name }}</span>
+    <ul class="gamelist">
         {% for game in games %}
-            <li id="{{ game.id }}"><a href="/connect4/play/{{ game.id }}">{{ game }}</a></li>
+            <li class="gamelist" id="{{ game.id }}"><a class="gamelist" href="/connect4/play/{{ game.id }}">{{ game }}</a></li>
         {% endfor %}
     </ul>
 </div>

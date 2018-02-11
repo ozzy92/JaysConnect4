@@ -1,0 +1,97 @@
+
+/* main */
+body {
+    margin: 0px;
+}
+
+/* header */
+div.header {
+    width: 100%;
+    padding: 20px;
+    background-color: #38c9de;
+    color: #01049e;
+    font-size: 20;
+    text-align: center;
+}
+
+span.headername {
+    position: absolute;
+    left: 15px;
+}
+span.headerlogin {
+    position: absolute;
+    right: 15px;
+}
+
+/* buttons */
+button {
+    background-color: #f51e1e;
+    font-size: 15;
+    color: white;
+    padding: 15px;
+    margin: 10px;
+    border: none;
+    border-radius: 10px;
+}
+button:hover {
+    background-color: #a20101;
+}
+
+/* games page game lists */
+div.games {
+    text-align: center;
+}
+
+div#available_games {
+    float: left;
+}
+
+div#running_games {
+    display: inline-block;
+}
+
+div#user_games {
+    float: right;
+}
+
+span.gamelisttitle {
+    display: block;
+    font-size: 20;
+    background-color: #0088FF;
+    color: #FFFFFF;
+    width: 100%;
+    line-height: 50px;
+}
+
+div.gamelist {
+    border: 10px solid #0000FF;
+    border-radius: 5px;
+    margin: 5px;
+    width: 300px;
+    text-align: center;
+}
+
+ul.gamelist {
+    list-style-type: none;
+    margin: 0px;
+    padding: 0px;    
+}
+
+li.gamelist {
+    margin: 1px;
+    padding: 0px;    
+}
+
+a.gamelist {
+    display: block;
+    padding: 10px;
+    margin: 0px;
+    text-decoration: none;
+    background-color: #ffb2f6;
+    color: #130075;
+}
+
+a:hover.gamelist {
+    background-color: #c126af;
+}
+

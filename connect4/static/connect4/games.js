@@ -1,7 +1,7 @@
 
 function games_list_update(games, list) {
     console.log('Replacing ' + list);
-    $('#' + list).html(games);
+    $('#' + list).replaceWith(games);
 }
 
 function create_game() {
