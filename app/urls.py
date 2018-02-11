@@ -25,5 +25,4 @@ urlpatterns = [
     # https://stackoverflow.com/questions/7580220/django-urls-howto-map-root-to-app
     url(r'^$', lambda r: HttpResponseRedirect('/connect4/')),
     url(r'^connect4/', include(connect4.urls)),
-    path('accounts/', include('django.contrib.auth.urls')),
 ]

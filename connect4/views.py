@@ -1,5 +1,7 @@
 
 
+from django.contrib import auth
+from django.contrib.auth.models import User
 from django.shortcuts import render, redirect
 from django.shortcuts import get_object_or_404, get_list_or_404
 from django.http import HttpResponse, Http404, HttpResponseRedirect, JsonResponse
@@ -20,28 +22,50 @@ def header_context(request):
 
 # Create your views here.
 def login(request):
-    """
-    Write your login view here
-    :param request:
-    :return:
-    """
-    return HttpResponse('Login Here!')
+    ''' login a user using a form.  Docs say don't do this, but the LoginView looks complicated. '''
+    error = None
+    if request.method == 'POST':
+        user = auth.authenticate(username = request.POST.get('username'), password = request.POST.get('password'))
+        if user is not None:
+            if user.is_active:
+                auth.login(request, user)
+                return HttpResponseRedirect('/connect4/')
+            error = 'User is disabled. Contact adminstrator'
+        else:
+            error = 'Unknown user and password.  Try again'
+    return render(request, 'connect4/login.html', context = { 'error' : error })
+    
 
 def logout(request):
-    """
-    write your logout view here
-    :param request:
-    :return:
-    """
-    return HttpResponse('Logout Here!')
+    ''' logout a user, we don't care if it works, just redirect home '''
+    auth.logout(request)
+    return HttpResponseRedirect('/connect4/')
+
 
 def signup(request):
-    """
-    write your user sign up view here
-    :param request:
-    :return:
-    """
-    return HttpResponse('Signup Here!')
+    ''' registers a new user for the site '''
+    error = None
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        first_name = request.POST.get('firstname')
+        password = request.POST.get('password')
+        password2 = request.POST.get('password2')
+        if password != password2:
+            error = "Passwords don't match."
+        elif len(password) < 6:
+            error = "Password should be 6 or more characters."
+        elif User.objects.filter(username = username):
+            error = "Someone has used that username."
+        else:
+            try:
+                user = User.objects.create_user(username, password = password, first_name = first_name)
+                auth.login(request, user)                
+            except Exception as e:
+                error = e
+            else:
+                return HttpResponseRedirect('/connect4/')
+    return render(request, 'connect4/signup.html', context = { 'error' : error })
+
 
 def games(request):
     ''' games page '''

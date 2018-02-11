@@ -36,11 +36,12 @@ class UserGames(GamesList):
     list_id = 'user_games'
 
     def get_queryset(self):
-        games = Game.objects.filter(Q(status = Game.Status.FINISHED.value) &
-                                    (Q(player1 = self.request.user) | Q(player2 = self.request.user)))
-        # limit to 50, in case someone really likes it
-        games = games[:50]
-        return games
+        if self.request.user.is_authenticated:
+            games = Game.objects.filter(Q(status = Game.Status.FINISHED.value) &
+                                        (Q(player1 = self.request.user) | Q(player2 = self.request.user)))
+            # limit to 50, in case someone really likes it
+            games = games[:50]
+            return games
 
 
 class BoardView(generic.DetailView):

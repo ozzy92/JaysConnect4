@@ -5,8 +5,15 @@ from . import views, rester, partial_views
 
 urlpatterns = [    
     url(r'^$', lambda r: HttpResponseRedirect('games')),    # redirect root to games
+
+    # main views
     path('games/', views.games),
     path('play/<int:pk>/', views.PlayView.as_view()),
+
+    # account setup
+    path('login/', views.login),
+    path('logout/', views.logout),
+    path('signup/', views.signup),
 
     # 'rester' views, just json gets
     path('rester/create_game/', rester.create_game),
