@@ -12,6 +12,7 @@ urlpatterns = [
     path('rester/create_game/', rester.create_game),
     path('rester/join_game/<int:pk>/', rester.join_game),
     path('rester/game_board/<int:pk>/', partial_views.BoardView.as_view()),
+    path('rester/make_move/<int:pk>/<int:column>/', rester.make_move),
 
     # view snippets used by ajax
     path('available_games/', partial_views.AvailableGames.as_view()),

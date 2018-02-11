@@ -5,6 +5,7 @@ from django.shortcuts import get_object_or_404, get_list_or_404
 from django.http import HttpResponse, Http404, HttpResponseRedirect, JsonResponse
 from django.views import generic
 from .models import Game
+from .partial_views import BoardView
 
 
 def header_context(request):
@@ -47,7 +48,7 @@ def games(request):
     return render(request, 'connect4/games.html', header_context(request))
 
 
-class PlayView(generic.DetailView):
+class PlayView(BoardView):
     model = Game
     template_name = 'connect4/play.html'
 

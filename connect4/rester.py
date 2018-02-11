@@ -26,3 +26,11 @@ def join_game(request, pk):
     response = game.join_up(request.user)
     response = json.dumps(response)
     return HttpResponse(response, content_type = 'text/json')
+
+@login_required
+def make_move(request, pk, column):
+    ''' makes a move for the current player and updates the game '''
+    game = get_object_or_404(Game, pk = pk)
+    response = game.make_move(request.user, column)
+    response = json.dumps(response)
+    return HttpResponse(response, content_type = 'text/json')

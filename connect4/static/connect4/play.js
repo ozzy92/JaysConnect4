@@ -1,15 +1,6 @@
 
 var game_pk;
 
-// sends a joingame request
-function join_game() {
-    console.log('Trying to join game ' + game_pk);
-    $.get('/connect4/rester/join_game/' + game_pk + '/', {}, (data) => {
-        console.log('Join result ' + data);
-        $('#player2').display = 'none';
-    });
-}
-
 // reload board html with polling query
 function load_board() {
     polling_http('/connect4/rester/game_board/' + game_pk + '/', 2000, (data) => {
@@ -18,11 +9,28 @@ function load_board() {
     });
 }
 
+// sends a joingame request
+function join_game() {
+    console.log('Joining join ' + game_pk);
+    $.get('/connect4/rester/join_game/' + game_pk + '/', {}, (data) => {
+        console.log('Join result ' + data);
+    });
+}
+
+// make a move in the game
+function make_move(column) {
+    console.log('Making move in column ' + column);
+    $.get('/connect4/rester/make_move/' + game_pk + '/' + column + '/', {}, (data) => {
+        console.log('Move result ' + data);
+    });
+}
+
 // called at page load to setup game
 function play_game() {    
     console.log('Playgame ' + game_pk + ' running.');
-    load_board();
-
+    $(document).ready(() => {        
+        load_board();
+    });
     /** sockets would be so much cleaner
     $(document).ready(function() {        
         // connect to websocket
