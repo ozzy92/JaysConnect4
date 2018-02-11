@@ -1,5 +1,6 @@
 from enum import Enum
 import logging
+import threading
 from django.contrib.auth.models import User
 from django.utils import timezone
 from django.db import models
@@ -62,10 +63,10 @@ class Game(models.Model):
         return self.status == self.Status.FINISHED.value and not self.winner
 
     @property
-    def start_date(self):
+    def start_time(self):
+        ''' this returns either the first move, or ceated time if no moves '''
         coins = self.coin_set.order_by('created_date')
-        if coins:
-            return coins[0].created_date
+        return coins[0].created_date if coins else self.created_date
 
     @property
     def last_move(self):        
@@ -199,6 +200,30 @@ class Game(models.Model):
             if (r, c) in cells:
                 coin.winner = True
                 coin.save()
+
+    @property
+    def _is_abandoned(self):
+        ''' deterimes if this game has been abandoned (with no moves after an hour) '''
+        if self.status in (self.Status.AVAILABLE.value, self.Status.RUNNING.value):
+            now = timezone.now()
+            last_change = self.last_move.created_date if self.last_move else self.start_time
+            delta = now - last_change
+            return (delta.total_seconds() > 60 * 60)
+        return False
+        
+    @classmethod
+    def clean_abandoned(cls):
+        ''' This method cleans up abandoned games in a new thread
+            We are defining an abandoned game to be one with more than an hour with no move
+        '''
+        # this page kicks off an abandoned game thread... no idea if this is a good way!
+        # https://stackoverflow.com/questions/21945052/simple-approach-to-launching-background-task-in-django
+        def clean():
+            for game in Game.objects.all():
+                if game._is_abandoned:
+                    game.status = Game.Status.ABANDONED.value
+                    game.save()
+        threading.Thread(target = clean, daemon = True).start()
 
 
 class Coin(models.Model):

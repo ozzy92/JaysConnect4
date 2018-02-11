@@ -45,6 +45,7 @@ def signup(request):
 
 def games(request):
     ''' games page '''
+    Game.clean_abandoned()
     return render(request, 'connect4/games.html', header_context(request))
 
 
