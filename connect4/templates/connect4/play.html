@@ -1,80 +1,11 @@
-<html>
-    <head>
-        <title>Connect4: Game #{{ game_pk }}</title>
-        <script type="text/javascript" src="{{ STATIC_URL }}jquery-3.3.1.js"></script>
-        <script type="text/javascript" src="{{ STATIC_URL }}reconnecting-websocket.js"></script>
-        <script type="text/javascript" src="{{ STATIC_URL }}connect4/connect4.js"></script>
-        <script type="text/javascript" src="{{ STATIC_URL }}connect4/play.js"></script>
-        <script type="text/javascript">
-            play_game({{game_pk}});
-        </script>
-    </head>
-    <body>
-        <table>
-            <tr>
-                <td><button id="placetoken1">Place Token</button></td>
-                <td><button id="placetoken2">Place Token</button></td>
-                <td><button id="placetoken3">Place Token</button></td>
-                <td><button id="placetoken4">Place Token</button></td>
-                <td><button id="placetoken5">Place Token</button></td>
-                <td><button id="placetoken6">Place Token</button></td>
-                <td><button id="placetoken7">Place Token</button></td>
-            </tr>
-            <tr>
-                <td id="row1col1"></td>
-                <td id="row1col2"></td>
-                <td id="row1col3"></td>
-                <td id="row1col4"></td>
-                <td id="row1col5"></td>
-                <td id="row1col6"></td>
-                <td id="row1col7"></td>
-            </tr>
-            <tr>
-                <td id="row2col1"></td>
-                <td id="row2col2"></td>
-                <td id="row2col3"></td>
-                <td id="row2col4"></td>
-                <td id="row2col5"></td>
-                <td id="row2col6"></td>
-                <td id="row2col7"></td>
-            </tr>
-            <tr>
-                <td id="row3col1"></td>
-                <td id="row3col2"></td>
-                <td id="row3col3"></td>
-                <td id="row3col4"></td>
-                <td id="row3col5"></td>
-                <td id="row3col6"></td>
-                <td id="row3col7"></td>
-            </tr>
-            <tr>
-                <td id="row4col1"></td>
-                <td id="row4col2"></td>
-                <td id="row4col3"></td>
-                <td id="row4col4"></td>
-                <td id="row4col5"></td>
-                <td id="row4col6"></td>
-                <td id="row4col7"></td>
-            </tr>
-            <tr>
-                <td id="row5col1"></td>
-                <td id="row5col2"></td>
-                <td id="row5col3"></td>
-                <td id="row5col4"></td>
-                <td id="row5col5"></td>
-                <td id="row5col6"></td>
-                <td id="row5col7"></td>
-            </tr>
-            <tr>
-                <td id="row6col1"></td>
-                <td id="row6col2"></td>
-                <td id="row6col3"></td>
-                <td id="row6col4"></td>
-                <td id="row6col5"></td>
-                <td id="row6col6"></td>
-                <td id="row6col7"></td>
-            </tr>
-        </table>
-        <div id="data"></div>
-    </body>
-</html>
+{% include "./header.html" with title=title %}
+<script type="text/javascript" src="{{ STATIC_URL }}connect4/play.js"></script>
+<script type="text/javascript">
+    game_pk = {{ game.id }};
+    play_game();
+</script>
+<div id="board">
+    {% include "./board.html" %}
+</div>
+<div id="data"></div>
+{% include "./footer.html" %}

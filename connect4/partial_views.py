@@ -37,3 +37,8 @@ class UserGames(GamesList):
     def get_queryset(self):
         # FIXME: implement!
         return []
+
+class BoardView(generic.DetailView):
+    ''' game board view '''
+    model = Game
+    template_name = 'connect4/board.html'

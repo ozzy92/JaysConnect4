@@ -3,7 +3,9 @@
 from django.shortcuts import render, redirect
 from django.shortcuts import get_object_or_404, get_list_or_404
 from django.http import HttpResponse, Http404, HttpResponseRedirect, JsonResponse
+from django.views import generic
 from .models import Game
+
 
 def header_context(request):
     ''' helper to get the header context '''
@@ -44,10 +46,12 @@ def games(request):
     ''' games page '''
     return render(request, 'connect4/games.html', header_context(request))
 
-def play(request, pk):
-    """
-    write your view which controls the gameplay interaction w the web layer here
-    :param request:
-    :return:
-    """
-    return render(request, 'connect4/play.html', { 'game_pk' : pk} )
+
+class PlayView(generic.DetailView):
+    model = Game
+    template_name = 'connect4/play.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update(header_context(self.request))
+        return context

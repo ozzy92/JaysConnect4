@@ -19,9 +19,17 @@ class Game(models.Model):
 
     def __str__(self):
         if self.player2:
-            return ' vs '.join([self.player1.get_full_name(), self.player2.get_full_name()])
+            return ' vs '.join([self.player1_name, self.player2_name])
         else:
-            return 'Join now to play %s' % (self.player1.get_full_name() or self.player1.get_username())
+            return 'Join now to play %s' % self.player1_name
+
+    @property
+    def player1_name(self):
+        return self.player1.get_short_name()
+    
+    @property
+    def player2_name(self):        
+        return self.player2.get_short_name() if self.player2 else ''
 
     @property
     def start_date(self):
@@ -36,8 +44,10 @@ class Game(models.Model):
         return self.last_move.created_date
 
     def join_up(self, player_2):
+        ''' join the game '''
         if self.player2 is None:
             self.player2 = player_2
+            self.status == self.Status.RUNNING.value
             self.save()
             return True
         else:
