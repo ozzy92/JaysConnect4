@@ -1,12 +1,14 @@
 
-function games_list_update(games, list) {
-    console.log('Replacing ' + list);
-    $('#' + list).replaceWith(games);
+function get_games_list(list) {
+    http_get('/connect4/' + list).then((data) => {
+        console.log('Replacing ' + list);
+        $('#' + list).replaceWith(data);
+    });
 }
 
 function create_game() {
     console.log('Creating game')
-    $.get('/connect4/rester/create_game', {}, (data) => {
+    http_get('/connect4/rester/create_game').then((data) => {
         console.log('Created game: ' + data)
         if('game_id' in data) {
             window.location = '/connect4/play/' + data.game_id;
@@ -15,12 +17,20 @@ function create_game() {
 }
 
 $(document).ready(() => {
-    let updaters = (url, list) => {
-        polling_http(url, 5000, (data) => {
-            games_list_update(data, list);
-        });
-    }
-    updaters('/connect4/available_games', 'available_games');
-    updaters('/connect4/running_games', 'running_games');
-    updaters('/connect4/user_games', 'user_games');
+    var socket = connect_socket('games/');
+    
+    socket.onmessage = (message) => {
+        var data = JSON.parse(message.data);
+
+        console.log('Got games socket: ' + data);
+        if('list' in data) {
+            var list = data['list'];
+
+            get_games_list(list);        
+        }
+    };
+
+    get_games_list('available_games');
+    get_games_list('running_games');
+    get_games_list('user_games');
 });

@@ -52,7 +52,7 @@
                     {% if col_full %}
                         <span class="columnfull">Column Full</span>
                     {% else %}
-                        <button class="placecoin" onclick="make_move({{ forloop.counter0 }});">Place Coin</button>
+                        <button class="placecoin" id="placetoken{{ forloop.counter0 }}" onclick="make_move({{ forloop.counter0 }});">Place Coin</button>
                     {% endif %}
                 {% endif %}
             </td>

@@ -13,9 +13,14 @@ function connect_socket(url) {
 // helper to turn setTimeout into a Promise
 var wait = ms => new Promise(resolve => setTimeout(resolve, ms));
 
-function http_get_promise(url) {
+function http_get(url) {
     // simple wrapper around jquery get that turns it into a promis
-    //new Promise(resolve => )
+    return new Promise((resolve, reject) => {
+        console.log('Http Get ' + url);
+        $.get(url, (data) => {
+            resolve(data);
+        });
+    });
 }
 
 function polling_http(url, interval, callback) {

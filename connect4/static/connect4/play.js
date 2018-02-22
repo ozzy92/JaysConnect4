@@ -2,9 +2,9 @@
 var game_pk;
 var prompt_leave;
 
-// reload board html with polling query
-function load_board() {
-    polling_http('/connect4/rester/game_board/' + game_pk + '/', 2000, (data) => {
+// loads the board
+function get_board() {
+    http_get('/connect4/rester/game_board/' + game_pk + '/').then((data) => {
         console.log('Reloading board ' + game_pk);
         $('#board').html(data);
     });
@@ -13,15 +13,18 @@ function load_board() {
 // sends a joingame request
 function join_game() {
     console.log('Joining join ' + game_pk);
-    $.get('/connect4/rester/join_game/' + game_pk + '/', {}, (data) => {
+    http_get('/connect4/rester/join_game/' + game_pk + '/', (data) => {
         console.log('Join result ' + data);
+        if(data) {
+            prompt_leave = true;
+        }
     });
 }
 
 // make a move in the game
 function make_move(column) {
     console.log('Making move in column ' + column);
-    $.get('/connect4/rester/make_move/' + game_pk + '/' + column + '/', {}, (data) => {
+    http_get('/connect4/rester/make_move/' + game_pk + '/' + column + '/', (data) => {
         console.log('Move result ' + data);
     });
 }
@@ -29,8 +32,11 @@ function make_move(column) {
 // called at page load to setup game
 function play_game() {    
     console.log('Playgame ' + game_pk + ' running.');
-    $(document).ready(() => {        
-        load_board();
+
+    $(document).ready(() => {
+        // reload the board
+        get_board();
+
         // hook leave prompt
         $(window).bind('beforeunload', function(){
             if(prompt_leave) {
@@ -39,27 +45,18 @@ function play_game() {
                 return 'Leave the game?';
             }
         });
-    });
-    /** sockets would be so much cleaner
-    $(document).ready(function() {        
-        // connect to websocket
-        var socket = connect_socket('play/' + game_pk);
 
-        // wire up play buttons
-        for(let c = 1; c <= board_columns; c ++) {
-            $('#placetoken' + c).on('click', function(event) {
-                console.log('Sending move in column ' + c);
-                socket.send(JSON.stringify({ 'play' : c }));
-            })
-        }
+        // connect to websocket
+        var socket = connect_socket('play/' + game_pk + '/');
 
         // wire up receive message
         socket.onmessage = function(message) {
             var data = JSON.parse(message.data);
 
             console.log('Received message: ' + data);
-            $('#data').append('<div>Got Data: ' + data + '</div>');
+            if(data.type == 'play.update') {
+                get_board();
+            }
         };
     });
-    **/
 }

@@ -101,15 +101,15 @@ TEMPLATES = [
 # I simply cannot get this to work.
 # The documentation is terrible, and all tutorials use asgi_regis and version 1.0 which breaks things
 # going to use http polling, yay
-# CHANNEL_LAYERS = {
-#     "default": {
-#         "BACKEND": "channels_redis.core.RedisChannelLayer",
-#         "CONFIG": {
-#             #"hosts": [(os.environ.get('REDIS_URL', 'redis://localhost'), 6379)],
-#             "hosts": [('localhost', 6379)],
-#         },
-#     },
-# }
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            #"hosts": [(os.environ.get('REDIS_URL', 'localhost'), 6379)],
+            "hosts": [('localhost', 6379)],
+        },
+    },
+}
 
 WSGI_APPLICATION = 'app.wsgi.application'
 ASGI_APPLICATION = "app.routing.application"
