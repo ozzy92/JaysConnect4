@@ -6,7 +6,7 @@ from django.shortcuts import render, redirect
 from django.shortcuts import get_object_or_404, get_list_or_404
 from django.http import HttpResponse, Http404, HttpResponseRedirect, JsonResponse
 from django.views import generic
-from .models import Game
+from .models import Game, Player, UserPlayer, ComputerPlayer
 from .partial_views import BoardView
 
 

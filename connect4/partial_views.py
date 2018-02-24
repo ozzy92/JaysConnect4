@@ -37,8 +37,10 @@ class UserGames(GamesList):
 
     def get_queryset(self):
         if self.request.user.is_authenticated:
-            games = Game.objects.filter(Q(status = Game.Status.FINISHED.value) &
-                                        (Q(player1 = self.request.user) | Q(player2 = self.request.user)))
+            games = Game.objects.filter(
+                Q(status = Game.Status.FINISHED.value) &
+                (Q(player1__userplayer__user = self.request.user) | Q(player2__userplayer__user = self.request.user))
+            )
             # limit to 50, in case someone really likes it
             games = games[:50]
             return games
@@ -53,11 +55,11 @@ class BoardView(generic.DetailView):
         context = super().get_context_data(**kwargs)
         game = self.object
         context.update({
-            'is_player1' : game.player1 == self.request.user,
-            'is_player2' : game.player2 == self.request.user,
+            'is_player1' : game.player1_user == self.request.user,
+            'is_player2' : game.player2_user == self.request.user,
             'next_move' : game.next_move.get_short_name() if game.next_move else None,
-            'is_user_move' : game.next_move == self.request.user,
-            'prompt_leave' : ((game.player1 == self.request.user or game.player2 == self.request.user) and
+            'is_user_move' : game.next_move_user == self.request.user,
+            'prompt_leave' : ((game.player1_user == self.request.user or game.player2_user == self.request.user) and
                                 game.status in (Game.Status.AVAILABLE.value, Game.Status.RUNNING.value))
         })
         return context

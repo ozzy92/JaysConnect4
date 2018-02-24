@@ -14,7 +14,7 @@ from .consumers import GamesConsumer, PlayConsumer, CHANNEL_AVAILABLE, CHANNEL_R
 @login_required
 def create_game(request):
     ''' create a game, return game_id '''    
-    new_game = Game(player1 = request.user)
+    new_game = Game(player1 = request.user.userplayer)
     new_game.save()
     id = new_game.pk
     response = json.dumps({ 'game_id' : id })
@@ -37,7 +37,7 @@ def join_game(request, pk):
 def make_move(request, pk, column):
     ''' makes a move for the current player and updates the game '''
     game = get_object_or_404(Game, pk = pk)
-    response = game.make_move(request.user, column)
+    response = game.make_move(request.user.userplayer, column)
     if response:
         PlayConsumer.send_update(CHANNEL_PLAY % pk)
         if game.status == Game.Status.FINISHED.value:

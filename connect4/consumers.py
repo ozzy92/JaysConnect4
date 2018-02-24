@@ -1,6 +1,6 @@
 
 from asgiref.sync import async_to_sync
-from channels.generic.websocket import AsyncJsonWebsocketConsumer
+from channels.generic.websocket import AsyncJsonWebsocketConsumer, AsyncConsumer
 from channels.layers import get_channel_layer
 import json
 import logging
@@ -15,6 +15,7 @@ CHANNEL_RUNNING = 'connect4.runninggames'
 CHANNEL_USER = 'connect4.usergames.%s'
 
 CHANNEL_PLAY = 'connect4.play.%d'
+
 
 class GamesConsumer(AsyncJsonWebsocketConsumer):
 
@@ -85,3 +86,12 @@ class PlayConsumer(AsyncJsonWebsocketConsumer):
             logger.info('Play Command disconnecting from channel %s for %s' % (self.play_channel, self.channel_name))
             await self.channel_layer.group_discard(self.play_channel, self.channel_name)
         await super().disconnect(close_code)
+
+
+class GameSeedConsumer(AsyncConsumer):
+    ''' This consumer creates games with computer players '''
+
+
+class GamePlayerConsumer(AsyncConsumer):
+    ''' This consumer plays a game as a computer player '''
+

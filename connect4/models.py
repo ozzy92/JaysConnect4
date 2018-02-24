@@ -2,8 +2,77 @@ from enum import Enum
 import logging
 import threading
 from django.contrib.auth.models import User
-from django.utils import timezone
 from django.db import models
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from django.utils import timezone
+from polymorphic.models import PolymorphicModel
+
+
+class Player(PolymorphicModel):
+    ''' base model for players with stats '''
+    wins = models.IntegerField(null = False, default = 0, editable = False)
+    losses = models.IntegerField(null = False, default = 0, editable = False)
+    draws = models.IntegerField(null = False, default = 0, editable = False)
+    abandoned = models.IntegerField(null = False, default = 0, editable = False)
+
+    def __str__(self):
+        return '%d wins; %d losses; %d draws; %d abandoned' % (self.wins, self.losses, self.draws, self.abandoned)
+
+
+class UserPlayer(Player):
+    ''' User player, uses Django users for login '''
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+
+    def get_short_name(self):
+        return self.user.get_short_name()
+
+    def __str__(self):        
+        return '%s - %s' % (self.get_short_name(), super().__str__())
+
+
+# magic from here: https://simpleisbetterthancomplex.com/tutorial/2016/07/22/how-to-extend-django-user-model.html#onetoone
+# creates UserPlayer for each user
+@receiver(post_save, sender=User)
+def create_user_profile(sender, instance, created, **kwargs):
+    if created:
+        UserPlayer.objects.create(user=instance)
+
+@receiver(post_save, sender=User)
+def save_user_profile(sender, instance, **kwargs):
+    instance.userplayer.save()
+
+
+STRATEGIES = {
+    1 : 'Random',
+    2 : 'Dumb',
+    3 : 'Smart',
+    4 : 'Learning',
+}
+STRATEGY_DESCRIPTIONS = {
+    1 : 'plays completely randomly',
+    2 : 'only looks at current move, but not ahead',
+    3 : 'brute force depth search scoring strategy',
+    4 : 'learning model that adjusts strategy with history and pattern matching',
+}
+
+class ComputerPlayer(Player):
+    ''' Computer player with strategy model '''
+    STRATEGY_CHOICES = tuple(
+        [
+            (k, '%s - %s' % (STRATEGIES[k], STRATEGY_DESCRIPTIONS[k]))
+            for k in sorted(STRATEGIES.keys())
+        ]
+    )
+
+    name = models.CharField(max_length = 30, blank = False, null = False, unique = True)
+    strategy = models.IntegerField(default = 1, blank = False, null = False, choices = STRATEGY_CHOICES)
+
+    def get_short_name(self):
+        return self.name
+
+    def __str__(self):
+        return '%s - %s - %s' % (self.get_short_name(), STRATEGIES[self.strategy], super().__str__())
 
 
 class Game(models.Model):
@@ -17,24 +86,30 @@ class Game(models.Model):
     ROWS = 6
     COLS = 7
 
-    player1 = models.ForeignKey(User, on_delete=models.CASCADE, related_name='player_1')
+    player1 = models.ForeignKey(Player, on_delete=models.CASCADE, related_name='player_1')
     player1color = models.IntegerField(default = 0x000000) # black
-    player2 = models.ForeignKey(User, on_delete=models.CASCADE, related_name='player_2', blank=True, null=True)
+    player2 = models.ForeignKey(Player, on_delete=models.CASCADE, related_name='player_2', blank=True, null=True)
     player2color = models.IntegerField(default = 0xFF0000) # red
     status = models.IntegerField(default = Status.AVAILABLE.value)
     winner = models.IntegerField(default = None, blank = True, null = True)
     created_date = models.DateTimeField(default=timezone.now)
 
-    def __str__(self):
-        if self.winner:
-            return '%s wins vs %s' % (self.winner_name, self.player1_name if self.winner == 2 else self.player2_name)
-        else:
-            return '%s %s %s%s' % (
-                self.player1_name, 
-                'draws' if self.is_draw else 'vs',
-                self.player2_name or '(Click to Join)',
-                ' (Abandoned)' if self.status == self.Status.ABANDONED.value else ''
-            )
+    def __str__(self):        
+        player1 = self.winner_name if self.winner else self.player1_name
+        player2 = ((self.player1_name if self.winner == 2 else self.player2_name)
+                   if self.winner_name else self.player2_name)
+        return '%s %s %s%s%s' % (
+            self.player1_name, 
+            'wins vs' if self.winner_name else 'draws' if self.is_draw else 'vs',
+            self.player2_name or '(Click to Join)',
+            ' (%s)' % self.last_action_date.strftime('%b %d %y')
+             if self.status in (self.Status.FINISHED.value, self.Status.ABANDONED.value) else '',
+            ' (Abandoned)' if self.status == self.Status.ABANDONED.value else ''
+        )
+
+    @property
+    def player1_user(self):
+        return self.player1.user if isinstance(self.player1, UserPlayer) else None
 
     @property
     def player1_name(self):
@@ -43,6 +118,10 @@ class Game(models.Model):
     @property
     def player1_color_web(self):
         return '#{0:06X}'.format(self.player1color)
+
+    @property
+    def player2_user(self):
+        return self.player2.user if isinstance(self.player2, UserPlayer) else None
 
     @property
     def player2_name(self):        
@@ -73,7 +152,7 @@ class Game(models.Model):
         last_move = self.coin_set.order_by('-created_date')
         if last_move:
             return last_move[0]
-
+    
     @property
     def next_move(self):
         ''' Retuns the user with the next move, if there are 2 players, and the game isn't over '''
@@ -84,6 +163,10 @@ class Game(models.Model):
             else:
                 # FIXME: make more fair with random starter
                 return self.player1
+
+    @property
+    def next_move_user(self):
+        return self.next_move.user if isinstance(self.next_move, UserPlayer) else None
 
     @property
     def last_action_date(self):
@@ -117,11 +200,11 @@ class Game(models.Model):
         ''' retuns col_full from _build_board for the template to use '''
         return self._build_board[1]
 
-    def join_up(self, player2):
+    def join_up(self, user):
         ''' join the game '''
         # FIXME: race condition not handled
-        if self.player1 != player2:
-            self.player2 = player2
+        if self.player1_user != user and not self.player2:
+            self.player2 = user.userplayer
             self.status = self.Status.RUNNING.value
             self.save()
             return True
@@ -228,7 +311,7 @@ class Game(models.Model):
 
 class Coin(models.Model):
     game = models.ForeignKey(Game, on_delete=models.CASCADE)
-    player = models.ForeignKey(User, on_delete=models.CASCADE)
+    player = models.ForeignKey(Player, on_delete=models.CASCADE)
     column = models.IntegerField()
     row = models.IntegerField()
     created_date = models.DateTimeField(default=timezone.now)
