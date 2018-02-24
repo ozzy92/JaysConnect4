@@ -1,6 +1,6 @@
 
 from channels.auth import AuthMiddlewareStack
-from channels.routing import ProtocolTypeRouter, URLRouter
+from channels.routing import ProtocolTypeRouter, URLRouter, ChannelNameRouter
 from django.conf.urls import url
 from django.urls import path, include
 import connect4.routing
@@ -12,4 +12,8 @@ application = ProtocolTypeRouter({
             path('connect4ws/', include(connect4.routing)),
         ])
     ),
+    "channel" : ChannelNameRouter({
+        "game-seed" : consumers.GameSeedConsumer,
+        "game-play" : consumers.GamePlayerConsumer,
+    })
 })

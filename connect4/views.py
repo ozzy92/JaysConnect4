@@ -8,6 +8,7 @@ from django.http import HttpResponse, Http404, HttpResponseRedirect, JsonRespons
 from django.views import generic
 from .models import Game, Player, UserPlayer, ComputerPlayer
 from .partial_views import BoardView
+from .consumers import GameSeedConsumer
 
 
 def header_context(request):
@@ -70,6 +71,7 @@ def signup(request):
 def games(request):
     ''' games page '''
     Game.clean_abandoned()
+    GameSeedConsumer.register()
     return render(request, 'connect4/games.html', header_context(request))
 
 

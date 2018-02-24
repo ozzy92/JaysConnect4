@@ -170,7 +170,7 @@ class Game(models.Model):
 
     @property
     def last_action_date(self):
-        return self.last_move.created_date
+        return self.last_move.created_date if self.last_move else self.start_time
 
     @property
     def _build_board(self):
