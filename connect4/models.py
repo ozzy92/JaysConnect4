@@ -69,7 +69,7 @@ class ComputerPlayer(Player):
     strategy = models.IntegerField(default = 1, blank = False, null = False, choices = STRATEGY_CHOICES)
 
     def get_short_name(self):
-        return self.name
+        return '%s (%s AI)' % (self.name, STRATEGIES[self.strategy])
 
     def __str__(self):
         return '%s - %s - %s' % (self.get_short_name(), STRATEGIES[self.strategy], super().__str__())
@@ -200,11 +200,11 @@ class Game(models.Model):
         ''' retuns col_full from _build_board for the template to use '''
         return self._build_board[1]
 
-    def join_up(self, user):
+    def join_up(self, player):
         ''' join the game '''
         # FIXME: race condition not handled
-        if self.player1_user != user and not self.player2:
-            self.player2 = user.userplayer
+        if self.player1 != player and not self.player2:
+            self.player2 = player
             self.status = self.Status.RUNNING.value
             self.save()
             return True
