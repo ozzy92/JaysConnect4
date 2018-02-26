@@ -156,6 +156,7 @@ class GameSeedConsumer(AsyncConsumer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._added = False
+        self._join_games_schedule = set()
 
     @classmethod
     def register(cls):
@@ -176,19 +177,27 @@ class GameSeedConsumer(AsyncConsumer):
             self._added = True
             logger.info('Registering for group; %s' % self.channel_name)
             await self.channel_layer.group_add(GamesConsumer._CHANNEL_AVAILABLE, self.channel_name)
-        await self._seed_games()
-        await self._join_games()
+        await self._check_for_updates()
 
     async def games_update(self, data):
         ''' get a games update '''
         logger.info('Seed Games update; %s' % (self.channel_name))
-        await self._seed_games()
-        await self._join_games()
+        await self._check_for_updates()
+
+    async def _check_for_updates(self):
+        ''' schedules checks for new data '''
+        self._seed_games_delayed()
+        self._join_games_delayed()
+
+    def _seed_games_delayed(self):
+        ''' helper to schedule delayed seeding '''
+        loop = asyncio.get_event_loop()
+        wait = random.randint(self.SEED_WAIT_MIN, self.SEED_WAIT_MAX)
+        logger.info('Sleeping %d to seed games' % wait)
+        loop.call_later(wait, lambda : asyncio.ensure_future(self._seed_games()))
 
     async def _seed_games(self):
         ''' adds games with computer players '''
-        logger.info('Sleeping to seed games')
-        await asyncio.sleep(random.randint(self.SEED_WAIT_MIN, self.SEED_WAIT_MAX))
         logger.info('Seeding games')
         num_games = Game.objects.filter(status = Game.Status.AVAILABLE.value).count()
         if num_games < self.SEEDED_GAMES:
@@ -196,16 +205,26 @@ class GameSeedConsumer(AsyncConsumer):
             player = random.choice(ComputerPlayer.objects.all())
             Game(player1 = player).save()
             await GamesConsumer.send_available_update_async()
+            if num_games + 1 < self.SEEDED_GAMES:
+                self._seed_games_delayed()
 
-    async def _join_games(self):
-        ''' Get any available games '''
-        logger.info('Sleeping to check games')
-        await asyncio.sleep(random.randint(self.SEED_WAIT_MIN, self.SEED_WAIT_MAX))
+    def _join_games_delayed(self):
+        ''' Schedule joining delay for waiting games '''
         logger.info('Checking for games to join')
-        now = timezone.now()
-        aged = now - datetime.timedelta(seconds = random.randint(self.JOIN_WAIT_MIN, self.JOIN_WAIT_MAX))
-        games = Game.objects.filter(status = Game.Status.AVAILABLE.value, created_date__lt = aged)
+        games = Game.objects.filter(status = Game.Status.AVAILABLE.value)
+        loop = asyncio.get_event_loop()
         for game in games:
+            if game.id not in self._join_games_schedule:
+                wait = random.randint(self.JOIN_WAIT_MIN, self.JOIN_WAIT_MAX)
+                logger.info('Waiting %d to join game %s' % (wait, game.id))
+                loop.call_later(wait, lambda : asyncio.ensure_future(self._join_game(game.id)))
+                self._join_games_schedule.add(game.id)
+        
+    async def _join_game(self, game_id):
+        ''' Get any available games '''
+        logger.info('Checking to join game %s' % game_id)
+        game = Game.objects.get(pk = game_id)
+        if game.status == Game.Status.AVAILABLE.value:
             logger.info('Joining game %s' % game)
             player = game.player1
             while player == game.player1:            
