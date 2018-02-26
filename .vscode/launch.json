@@ -15,6 +15,7 @@
             "args": [
                 "runworker",
                 "game-seed",
+                "game-player"
             ],
             "env": {},
             "envFile": "${workspaceFolder}/.env",

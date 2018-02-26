@@ -12,7 +12,8 @@ from django.utils import timezone
 from channels.consumer import AsyncConsumer
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from channels.layers import get_channel_layer
-from .models import Game, ComputerPlayer
+from .models import Game, ComputerPlayer, STRATEGIES
+from . import strategies
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -130,7 +131,7 @@ class PlayConsumer(AsyncJsonWebsocketConsumer):
         channel_layer = get_channel_layer()
         channel = cls._CHANNEL_PLAY % game.id
         logger.info('Sending async player update to channel %s' % channel)
-        await channel_layer.group_send(channel, { 'type' : 'play.update' })
+        await channel_layer.group_send(channel, { 'type' : 'play.update', 'game' : game.id })
 
     async def play_update(self, data):
         ''' play update recieved, relay to clients '''
@@ -177,7 +178,7 @@ class GameSeedConsumer(AsyncConsumer):
             self._added = True
             logger.info('Registering for group; %s' % self.channel_name)
             await self.channel_layer.group_add(GamesConsumer._CHANNEL_AVAILABLE, self.channel_name)
-        await self._check_for_updates()
+            await self._check_for_updates()
 
     async def games_update(self, data):
         ''' get a games update '''
@@ -203,7 +204,9 @@ class GameSeedConsumer(AsyncConsumer):
         if num_games < self.SEEDED_GAMES:
             logger.info('Adding new seeded game')
             player = random.choice(ComputerPlayer.objects.all())
-            Game(player1 = player).save()
+            game = Game(player1 = player)
+            game.save()
+            await GamePlayerConsumer.send_play_game_async(game)
             await GamesConsumer.send_available_update_async()
             if num_games + 1 < self.SEEDED_GAMES:
                 self._seed_games_delayed()
@@ -232,6 +235,7 @@ class GameSeedConsumer(AsyncConsumer):
             logger.info('Joining game %s; chose player %s' % (game, player))
             if game.join_up(player):
                 logger.info('Joined game %s; player %s' % (game, player))
+                await GamePlayerConsumer.send_play_game_async(game)
                 await GamesConsumer.send_available_update_async()
                 await GamesConsumer.send_running_update_async()
                 await PlayConsumer.send_play_update_async(game)
@@ -240,3 +244,64 @@ class GameSeedConsumer(AsyncConsumer):
 class GamePlayerConsumer(AsyncConsumer):
     ''' This consumer plays a game as a computer player '''
 
+    MOVE_DELAY = 5
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # game players is a dictionary of (game, player) = strategy
+        self._game_players = {}
+
+    @classmethod
+    async def send_play_game_async(cls, game):
+        ''' tells consumer to start running '''
+        logger.info('Game player sending playing to register computer player')
+        channel_layer = get_channel_layer()
+        await channel_layer.send(
+            "game-player",
+            {
+                "type" : "play.game",
+                "game" : game.id,                
+            }
+        )
+
+    async def play_game(self, data):
+        ''' Handles a new game to play, registers AI players to play the game '''
+        logger.info('Game player got message to play game %s' % data)
+        game_id = data['game']
+        game = Game.objects.get(pk = game_id)
+        for player in (game.player1, game.player2):
+            if isinstance(player, ComputerPlayer):
+                strategy_class = '%sStrategy' % STRATEGIES[player.strategy]
+                strategy_class = getattr(strategies, strategy_class)
+                strategy = strategy_class(game, player)
+                strategy.start()
+                self._game_players[game.id, player.id] = strategy
+        play_channel = PlayConsumer._CHANNEL_PLAY % game.id
+        await self.channel_layer.group_add(play_channel, self.channel_name)
+
+    async def play_update(self, data):
+        ''' play update recieved, relay to clients '''
+        logger.info('Game player play update received, playing strategies: %s' % (data))
+        game_id = data['game']
+        game = Game.objects.get(pk = game_id)
+        if game.status == Game.Status.RUNNING.value:
+            player = game.next_move
+            strategy = self._game_players.get((game_id, player.id))
+            if strategy:
+                async def move_delayed():
+                    logger.info('Making move for %s in game %s; %s' % (player, game_id, game))
+                    strategy.reload_game()
+                    strategy.make_move()
+                    await PlayConsumer.send_play_update_async(game)
+
+                logger.info('Queuing move for %s in game %s; %s' % (player, game_id, game))
+                loop = asyncio.get_event_loop()
+                loop.call_later(self.MOVE_DELAY, lambda : asyncio.ensure_future(move_delayed()))
+        elif game.status in (Game.Status.FINISHED.value, Game.Status.ABANDONED.value):
+            for player in (game.player1, game.player2):
+                if player:
+                    strategy = self._game_players.get((game_id, player.id))
+                    if strategy:
+                        strategy.stop()
+                        logger.info('Game over, removing %s from game %s; %s' % (player, game_id, game))
+                        del self._game_players[(game_id, player.id)]

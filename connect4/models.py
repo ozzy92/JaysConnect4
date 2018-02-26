@@ -99,9 +99,9 @@ class Game(models.Model):
         player2 = ((self.player1_name if self.winner == 2 else self.player2_name)
                    if self.winner_name else self.player2_name)
         return '%s %s %s%s%s' % (
-            self.player1_name, 
+            player1, 
             'wins vs' if self.winner_name else 'draws' if self.is_draw else 'vs',
-            self.player2_name or '(Click to Join)',
+            player2 or '(Click to Join)',
             ' (%s)' % self.last_action_date.strftime('%b %d %y')
              if self.status in (self.Status.FINISHED.value, self.Status.ABANDONED.value) else '',
             ' (Abandoned)' if self.status == self.Status.ABANDONED.value else ''
@@ -237,7 +237,7 @@ class Game(models.Model):
                             self.status = self.Status.FINISHED.value
                             self.save()                            
                         return True
-        logging.warning('Invalid move received %s, %s, %s' % (self.id, player.username, column))
+        logging.warning('Invalid move received %s, %s, %s' % (self.id, player, column))
         return False
 
     def _is_winner(self, board, row, column):

@@ -12,8 +12,7 @@ application = ProtocolTypeRouter({
             path('connect4ws/', include(connect4.routing)),
         ])
     ),
-    "channel" : ChannelNameRouter({
-        "game-seed" : consumers.GameSeedConsumer,
-        "game-play" : consumers.GamePlayerConsumer,
-    })
+    "channel" : ChannelNameRouter(
+        connect4.routing.channel_names
+    ),
 })
