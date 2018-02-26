@@ -17,8 +17,11 @@ class Player(PolymorphicModel):
     abandoned = models.IntegerField(null = False, default = 0, editable = False)
 
     def __str__(self):
-        return '%d wins; %d losses; %d draws; %d abandoned' % (self.wins, self.losses, self.draws, self.abandoned)
+        return self.stats_str
 
+    @property
+    def stats_str(self):
+        return '%d wins; %d losses; %d draws; %d abandoned' % (self.wins, self.losses, self.draws, self.abandoned)
 
 class UserPlayer(Player):
     ''' User player, uses Django users for login '''
@@ -217,7 +220,7 @@ class Game(models.Model):
         if player == self.next_move and 0 <= column < self.COLS:
             player_num = 1 if self.player1 == player else 2
             (board, col_full) = self._build_board
-            if not self.col_full[column]:
+            if not col_full[column]:
                 # determine the row the coin falls to
                 for (row_index, row) in enumerate(board):
                     if not row[column][0]:
@@ -232,10 +235,19 @@ class Game(models.Model):
                             self.status = self.Status.FINISHED.value
                             self.winner = player_num
                             self.save()
+                            player.wins += 1
+                            player.save()
+                            player2 = self.player1 if player_num == 2 else self.player2
+                            player2.losses += 1
+                            player2.save()
                         # no winner, see if it's a draw
                         elif len(self.coin_set.all()) == self.ROWS * self.COLS:
                             self.status = self.Status.FINISHED.value
-                            self.save()                            
+                            self.save()   
+                            self.player1.draws += 1
+                            self.player1.save()
+                            self.player2.draws += 1                         
+                            self.player2.save()
                         return True
         logging.warning('Invalid move received %s, %s, %s' % (self.id, player, column))
         return False
@@ -299,13 +311,18 @@ class Game(models.Model):
         ''' This method cleans up abandoned games in a new thread
             We are defining an abandoned game to be one with more than an hour with no move
         '''
-        # this page kicks off an abandoned game thread... no idea if this is a good way!
+        # this kicks off an abandoned game thread... no idea if this is a good way!
         # https://stackoverflow.com/questions/21945052/simple-approach-to-launching-background-task-in-django
         def clean():
             for game in Game.objects.all():
                 if game._is_abandoned:
                     game.status = Game.Status.ABANDONED.value
                     game.save()
+                    game.player1.abandoned += 1
+                    game.player1.save()
+                    if game.player2:
+                        game.player2.abandoned += 1
+                        game.player2.save()
         threading.Thread(target = clean, daemon = True).start()
 
 

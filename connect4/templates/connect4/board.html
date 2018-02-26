@@ -10,6 +10,9 @@
         {% else %}
             {{ game.player1_name }}
         {% endif %}
+        <span class="playerstats">
+            {{ game.player1.stats_str }}
+        </span>        
     </span>
     <span class="player2" style="background: {{ game.player2_color_web }};">
         Player 2:
@@ -22,6 +25,11 @@
                 Waiting for Someone!
             {% endif %}
         </span>
+        <span class="playerstats">
+            {% if game.player2 %}
+                {{ game.player2.stats_str }}
+            {% endif %}
+        </span>        
     </span>
 </div>
 <div class="moveinfo">
