@@ -1,19 +1,17 @@
 
-# My Notes, Being new to Django, and pretty rusty to building websites from scratch, I had to do alot of googling
+##### My Notes
+Being new to Django, and pretty rusty to building websites from scratch, I had to do alot of googling
 
-# Jquery 
+Jquery 
 https://stackoverflow.com/questions/12031825/how-to-set-up-django-website-with-jquery 
 
-# from what I can tell, channels_redis doesn't work, at all. I give up.  I'm going to do http polling
-# Websockets tutorial here, but out of date, broke my install!
-https://blog.heroku.com/in_deep_with_django_channels_the_future_of_real_time_apps_in_django
-# Actual docs more up to date, follow this
+Channels, Actual docs more up to date, follow this, managed to get it working after alot of headscratching
 https://channels.readthedocs.io/
-# Some hints here
+
+Some hints here
 https://teamtreehouse.com/community/deploying-asgi-alongside-wsgi-on-heroku
 
-
-# Reconnecting websocket project
+Reconnecting websocket project
 https://github.com/joewalnes/reconnecting-websocket
 
 
