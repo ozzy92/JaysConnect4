@@ -1,3 +1,8 @@
+## Working version
+https://guarded-ravine-75631.herokuapp.com/
+
+To play, need 2 players.  For self play, use incognito to login to a 2nd account.  The game will wait until a 2nd person joins.
+
 
 ##### My Notes
 Being new to Django, and pretty rusty to building websites from scratch, I had to do alot of googling
