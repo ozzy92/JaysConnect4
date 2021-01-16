@@ -1,7 +1,9 @@
 ## Working version
 https://guarded-ravine-75631.herokuapp.com/
 
-To play, need 2 players.  For self play, use incognito to login to a 2nd account.  The game will wait until a 2nd person joins.
+To play, use the login link to login or register a new account.
+2 players are needed.  For self play, use incognito mode to login to a 2nd account.
+The game will wait until a 2nd person joins, so sometimes is not immediately obvious how to start!
 
 
 ##### My Notes
